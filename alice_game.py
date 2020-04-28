@@ -4,6 +4,8 @@ import logging
 import json
 import random
 
+from geo import get_country
+
 app = Flask(__name__)
 
 logging.basicConfig(level=logging.INFO)
@@ -44,7 +46,8 @@ def handle_dialog(res, req):
         ]
         sessionStorage[user_id] = {
             'first_name': None,
-            'game_started': False
+            'game_started': False,
+            'city_answered': False
         }
         return
 
@@ -114,27 +117,13 @@ def play_game(res, req):
         res['response']['card']['title'] = 'Что это за город?'
         res['response']['card']['image_id'] = cities[city][attempt - 1]
         res['response']['text'] = 'Тогда сыграем!'
-    else:
+    elif not sessionStorage[user_id]['city_answered']:
         city = sessionStorage[user_id]['city']
         if get_city(req) == city:
-            res['response']['text'] = 'Правильно! Сыграем ещё?'
+            res['response']['text'] = 'Правильно! А в какой стране этот город?'
+            attempt = 2
             sessionStorage[user_id]['guessed_cities'].append(city)
-            sessionStorage[user_id]['game_started'] = False
-            res['response']['buttons'] = [
-                {
-                    'title': 'Да',
-                    'hide': True
-                },
-                {
-                    'title': 'Нет',
-                    'hide': True
-                },
-                {
-                    'title': 'Покажи город на карте',
-                    'url': f'https://yandex.ru/maps/?mode=search&text={city}',
-                    'hide': True
-                }
-            ]
+            sessionStorage[user_id]['city_answered'] = True
             return
         else:
             if attempt == 3:
@@ -148,6 +137,35 @@ def play_game(res, req):
                 res['response']['card']['title'] = 'Неправильно. Вот тебе дополнительное фото'
                 res['response']['card']['image_id'] = cities[city][attempt - 1]
                 res['response']['text'] = 'А вот и не угадал!'
+    else:
+        if get_country(sessionStorage[user_id]['guessed_cities'][-1]) in req['request']['command']:
+            res['response']['text'] = 'Правильно! Сыграем ещё?'
+            sessionStorage[user_id]['game_started'] = False
+            res['response']['buttons'] = [
+                {
+                    'title': 'Да',
+                    'hide': True
+                },
+                {
+                    'title': 'Нет',
+                    'hide': True
+                },
+                {
+                    'title': 'Покажи город на карте',
+                    'url': f"https://yandex.ru/maps/?mode=search&text={sessionStorage[user_id]['guessed_cities'][-1]}",
+                    'hide': True
+                }
+            ]
+            return
+        else:
+            if attempt == 3:
+                res['response']['text'] = 'Вы пытались. Это ' \
+                                          f"{get_country(sessionStorage[user_id]['guessed_cities'][-1])}. Сыграем ещё?"
+                sessionStorage[user_id]['game_started'] = False
+                return
+            else:
+                res['response']['text'] = 'Попробуйте ещё!'
+                return
     sessionStorage[user_id]['attempt'] += 1
 
 
