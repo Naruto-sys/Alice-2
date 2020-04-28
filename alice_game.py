@@ -122,7 +122,7 @@ def play_game(res, req):
         city = sessionStorage[user_id]['city']
         if get_city(req) == city:
             res['response']['text'] = 'Правильно! А в какой стране этот город?'
-            attempt = 2
+            sessionStorage[user_id]['attempt'] = 2
             sessionStorage[user_id]['guessed_cities'].append(city)
             sessionStorage[user_id]['city_answered'] = True
             return
