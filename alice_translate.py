@@ -30,8 +30,8 @@ def main():
 
 def handle_dialog(res, req):
     if req['session']['new']:
-        res['response']['text'] = 'Привет! Я могу перевести слово на английский. ' \
-                                  'Для этого скажи: Переведи слово и само слово'
+        res['response']['text'] = 'Скажите "Переведи слово", а затем само слово,' \
+                                  ' и я переведу Вам это слово на английский язык!'
         return
 
     res['response']['text'] = translate(req) + "\nЧто-то ещё?"
@@ -47,7 +47,7 @@ def translate(req):
         "lang": "ru-en"
     }
     response = requests.get("https://translate.yandex.net/api/v1.5/tr.json/translate", params=params)
-    return response.json()['text'][0]
+    return response.json()['text'][0].title()
 
 
 if __name__ == '__main__':
