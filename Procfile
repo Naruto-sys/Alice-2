@@ -1,1 +1,1 @@
-web: python main_flask.py
+web: python alice_maps.py
