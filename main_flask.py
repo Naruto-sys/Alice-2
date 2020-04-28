@@ -36,10 +36,22 @@ def handle_dialog(res, req):
     user_id = req['session']['user_id']
     if req['session']['new']:
         res['response']['text'] = 'Привет! Назови своё имя!'
+        res['response']['buttons'] = [
+            {
+                'title': "Помощь",
+                'hide': False
+            }
+        ]
         sessionStorage[user_id] = {
             'first_name': None,
             'game_started': False
         }
+        return
+
+    if 'Помощь' in req['request']['command']:
+        res['response']['text'] = 'Я буду присылать Вам фото городов, а Вы' \
+                                  ' должны будете угадывать, какой именно город' \
+                                  ' я прислала! Если не справитесь - я помогу!'
         return
 
     if sessionStorage[user_id]['first_name'] is None:
