@@ -34,20 +34,23 @@ def handle_dialog(res, req):
                                   ' и я переведу Вам это слово на английский язык!'
         return
 
-    res['response']['text'] = translate(req) + "\nЧто-то ещё?"
+    res['response']['text'] = translate(req) + "\nПопробуете ещё?"
 
 
 def translate(req):
     text = ""
-    for word in req['request']['nlu']['tokens'][2:]:
-        text += word
-    params = {
-        "key": "trnsl.1.1.20200428T170441Z.aa3e646d79eb90ac.cd983e95119d3f95037f94ddba30a85e9684604a",
-        "text": text,
-        "lang": "ru-en"
-    }
-    response = requests.get("https://translate.yandex.net/api/v1.5/tr.json/translate", params=params)
-    return response.json()['text'][0].title()
+    try:
+        for word in req['request']['nlu']['tokens'][2:]:
+            text += word
+        params = {
+            "key": "trnsl.1.1.20200428T170441Z.aa3e646d79eb90ac.cd983e95119d3f95037f94ddba30a85e9684604a",
+            "text": text,
+            "lang": "ru-en"
+        }
+        response = requests.get("https://translate.yandex.net/api/v1.5/tr.json/translate", params=params)
+        return response.json()['text'][0].title()
+    except Exception:
+        return "Что-то не так! Повторите, пожалуйста, запрос!"
 
 
 if __name__ == '__main__':
