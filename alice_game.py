@@ -83,6 +83,7 @@ def handle_dialog(res, req):
                     res['end_session'] = True
                 else:
                     sessionStorage[user_id]['game_started'] = True
+                    sessionStorage[user_id]['city_answered'] = False
                     sessionStorage[user_id]['attempt'] = 1
                     play_game(res, req)
             elif 'нет' in req['request']['nlu']['tokens']:
@@ -129,6 +130,7 @@ def play_game(res, req):
             if attempt == 3:
                 res['response']['text'] = f'Вы пытались. Это {city.title()}. Сыграем ещё?'
                 sessionStorage[user_id]['game_started'] = False
+                sessionStorage[user_id]['attempt'] = 1
                 sessionStorage[user_id]['guessed_cities'].append(city)
                 return
             else:
@@ -159,13 +161,13 @@ def play_game(res, req):
             return
         else:
             if attempt == 3:
+                sessionStorage[user_id]['attempt'] = 1
+                sessionStorage[user_id]['game_started'] = False
                 res['response']['text'] = 'Вы пытались. Это ' \
                                           f"{get_country(sessionStorage[user_id]['guessed_cities'][-1])}. Сыграем ещё?"
-                sessionStorage[user_id]['game_started'] = False
                 return
             else:
                 res['response']['text'] = 'Попробуйте ещё!'
-                return
     sessionStorage[user_id]['attempt'] += 1
 
 
